@@ -6,7 +6,12 @@ A [kbsink](https://github.com/kbsink-org/kbsink) plugin for Douyin share links: 
 
 ## Requirements
 
-- Go 1.26 or newer (see `go.mod`)
+- Go **1.24** or newer, aligned with [kbsink](https://github.com/kbsink-org/kbsink) (see `go.mod`).
+- Local development uses `replace github.com/kbsink-org/kbsink => ../kbsink` when this repo sits next to `kbsink` in the same parent folder.
+
+## Releases / binaries
+
+Pushing a tag `v*` runs GitHub Actions: cross-builds **`kb-sink-md-douyin`** (same CLI as `kb-sink-md`, with Douyin Parser+Driver registered for `--plugin douyin`; `kbsink.Converter` runs in-process) plus optional **`douyin-plugin`** smoke binary. Archives and `SHA256SUMS.txt` attach to the GitHub Release. CI checks out `kbsink-org/kbsink` next to this module so the `replace` directive resolves on the runner.
 
 ## Library usage
 

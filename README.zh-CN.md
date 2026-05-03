@@ -6,7 +6,12 @@
 
 ## 要求
 
-- Go 1.26+（见 `go.mod`）
+- Go **1.24+**，与 [kbsink](https://github.com/kbsink-org/kbsink) 对齐（见 `go.mod`）。
+- 本地若与 `kbsink` 仓库并列放在同一父目录，可使用 `go.mod` 中的 `replace github.com/kbsink-org/kbsink => ../kbsink`。
+
+## 发版与二进制
+
+推送 `v*` 标签会触发 GitHub Actions：交叉编译 **`kb-sink-md-douyin`**（与 `kb-sink-md` 相同 CLI，进程内注册抖音 Parser+Driver，可用 `--plugin douyin`；`Converter` 仍在 kbsink 内执行），以及可选的冒烟工具 **`douyin-plugin`**。会上传各平台压缩包与 `SHA256SUMS.txt`。CI 会检出 `kbsink-org/kbsink` 以满足 `replace` 路径。
 
 ## 作为库使用
 

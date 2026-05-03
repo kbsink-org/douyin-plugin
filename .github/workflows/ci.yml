@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: douyin-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: kbsink-org/kbsink
+          ref: main
+          path: kbsink
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: douyin-plugin/go.mod
+          cache-dependency-path: douyin-plugin/go.sum
+
+      - name: Test
+        working-directory: douyin-plugin
+        run: go test ./...

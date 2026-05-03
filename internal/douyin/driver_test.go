@@ -1,4 +1,4 @@
-package douyin
+package douyinconv
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestDriverFetch_ErrorCodes(t *testing.T) {
-	d := NewDriver(nil)
+	d := NewHTTPDriver(nil)
 
 	_, err := d.Fetch(context.Background(), "")
 	if got := core.ErrorCodeOf(err); got != core.ErrCodeInvalidArgument {
@@ -38,7 +38,7 @@ func TestDriverFetch_FromShareText(t *testing.T) {
 	defer ts.Close()
 
 	shareText := "7.92 复制打开抖音看看 " + ts.URL + "/jump"
-	d := NewDriver(ts.Client())
+	d := NewHTTPDriver(ts.Client())
 	d.videoPageBase = ts.URL + "/share/video"
 	got, err := d.Fetch(context.Background(), shareText)
 	if err != nil {

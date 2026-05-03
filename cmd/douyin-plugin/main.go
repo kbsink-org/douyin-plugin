@@ -19,9 +19,12 @@ func main() {
 		timeout    = flag.Duration("timeout", 60*time.Second, "timeout for fetch+parse")
 		printOnly  = flag.Bool("print", false, "print markdown to stdout (still downloads assets when not print-only)")
 		videoMode  = flag.String("video-mode", "link", "video markdown mode: link|embed")
+		format     = flag.String("format", "text", "output format: text|json (for full CLI with --plugin douyin use kb-sink-md-douyin)")
 	)
 	flag.Usage = func() {
-		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage:\n  %s [flags] <douyin-share-url-or-text>\n\nRuns kbsink Converter with Douyin driver+parser (integration smoke test).\n\nFlags:\n", os.Args[0])
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage:\n  %s [flags] <douyin-share-url-or-text>\n\n"+
+			"Runs kbsink Converter with Douyin driver+parser.\n"+
+			"For the same flags as kb-sink-md with Douyin, use the kb-sink-md-douyin binary.\n\nFlags:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -41,7 +44,7 @@ func main() {
 
 	mode, err := resolveVideoMode(*videoMode)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "resolve video mode failed: %v\n", err)
+		emitErr(*format, raw, err)
 		os.Exit(1)
 	}
 
@@ -55,15 +58,32 @@ func main() {
 		VideoMode:  mode,
 	})
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "convert failed: %v\n", err)
+		emitErr(*format, raw, err)
 		os.Exit(1)
 	}
 
-	if *printOnly {
-		_, _ = fmt.Fprint(os.Stdout, res.Markdown)
+	if err := emitOK(*format, raw, res, *printOnly); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "emit output: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func emitErr(format, src string, err error) {
+	if strings.TrimSpace(strings.ToLower(format)) == "json" {
+		_ = writeCLIJSON(os.Stdout, src, nil, err, false)
 		return
 	}
+	_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+}
 
+func emitOK(format, src string, res *core.ArticleResult, printOnly bool) error {
+	if strings.TrimSpace(strings.ToLower(format)) == "json" {
+		return writeCLIJSON(os.Stdout, src, res, nil, printOnly)
+	}
+	if printOnly {
+		_, _ = fmt.Fprint(os.Stdout, res.Markdown)
+		return nil
+	}
 	_, _ = fmt.Fprintf(os.Stdout, "title: %s\n", res.Title)
 	_, _ = fmt.Fprintf(os.Stdout, "markdown: %s\n", res.MarkdownPath)
 	_, _ = fmt.Fprintf(os.Stdout, "images: %d\n", len(res.Images))
@@ -74,6 +94,7 @@ func main() {
 		}
 	}
 	_, _ = fmt.Fprintf(os.Stdout, "videos: %d\n", videoCount)
+	return nil
 }
 
 func resolveVideoMode(raw string) (core.VideoMode, error) {

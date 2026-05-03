@@ -1,6 +1,6 @@
 module github.com/kbsink-org/douyin-plugin
 
-go 1.26
+go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.12.0
@@ -22,3 +22,5 @@ require (
 	github.com/aws/smithy-go v1.25.0 // indirect
 	golang.org/x/net v0.53.0 // indirect
 )
+
+replace github.com/kbsink-org/kbsink => ../kbsink

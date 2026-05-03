@@ -1,4 +1,4 @@
-package douyin
+package douyinconv
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type Driver struct {
 	videoPageBase string
 }
 
-func NewDriver(client *http.Client) *Driver {
+func NewHTTPDriver(client *http.Client) *Driver {
 	if client == nil {
 		client = http.DefaultClient
 	}
