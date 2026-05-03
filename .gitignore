@@ -1,0 +1,26 @@
+# Build / test artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.*
+
+# Go workspace (local)
+go.work
+go.work.sum
+
+# Vendor (uncomment if you do not commit vendor/)
+# vendor/
+
+# CLI default output (`douyin-plugin -o output`)
+output/
+
+# OS / editor
+.DS_Store
+.idea/
+
+output/
+

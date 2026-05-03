@@ -90,6 +90,7 @@ func (p *Parser) Parse(_ context.Context, fetched *core.FetchResult, outputDir s
 	if account != "" {
 		md += "\n\n作者: " + account
 	}
+
 	md += buildVideoLinksMarkdown(assets)
 	for _, asset := range assets {
 		if asset.Type == core.AssetTypeImage {
@@ -124,8 +125,12 @@ func extractEscapedURLs(raw string) []string {
 func extractVideoInfoFromHTML(html string, videoID string) (string, string) {
 	videoURL := ""
 	if m := douyinPlayAddrPattern.FindStringSubmatch(html); len(m) == 2 {
-		videoURL = strings.TrimSpace(strings.ReplaceAll(m[1], `\/`, "/"))
+		videoURL = normalizeDouyinJSONURL(m[1])
 		videoURL = strings.ReplaceAll(videoURL, "playwm", "play")
+		lower := strings.ToLower(videoURL)
+		if !strings.HasPrefix(lower, "http://") && !strings.HasPrefix(lower, "https://") {
+			videoURL = ""
+		}
 	}
 
 	title := ""
@@ -141,6 +146,16 @@ func extractVideoInfoFromHTML(html string, videoID string) (string, string) {
 	}
 	backupURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + url.QueryEscape(strings.TrimSpace(videoID))
 	return backupURL, title
+}
+
+// normalizeDouyinJSONURL turns Douyin-embedded JSON string escapes into a real URL prefix.
+func normalizeDouyinJSONURL(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ReplaceAll(s, `\/`, "/")
+	s = strings.ReplaceAll(s, `\u002F`, "/")
+	s = strings.ReplaceAll(s, `\u002f`, "/")
+	s = strings.ReplaceAll(s, `\u0026`, "&")
+	return strings.TrimSpace(s)
 }
 
 func sanitizeDouyinTitle(raw string) string {
