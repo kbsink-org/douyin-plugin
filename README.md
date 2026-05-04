@@ -2,63 +2,59 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A [kbsink](https://github.com/kbsink-org/kbsink) plugin for Douyin share links: a `Driver` (fetch page HTML) and a `Parser` (turn HTML into Markdown) for use with `Converter`. Includes `cmd/douyin-plugin` for local integration and smoke testing.
+Go module that adds **Douyin** (share links / share text) support to [kbsink](https://github.com/kbsink-org/kbsink): a **`Parser`** (HTML → article structure / markdown) and a **`Driver`** (HTTP fetch). Import **`github.com/kbsink-org/douyin-plugin/pkg/douyin`**.
+
+**Command line:** use [kbsink-cli](https://github.com/kbsink-org/kbsink-cli) for a ready-made `kbsink` binary (WeChat, Xiaohongshu, Douyin).
 
 ## Requirements
 
-- Go **1.24** or newer, aligned with [kbsink](https://github.com/kbsink-org/kbsink) (see `go.mod`).
-- Local development uses `replace github.com/kbsink-org/kbsink => ../kbsink` when this repo sits next to `kbsink` in the same parent folder.
+- **Go 1.25+** (see `go.mod`; stay aligned with the kbsink version you depend on).
+- Local dev: a [workspace](https://go.dev/ref/mod#workspaces) that includes this repo and `kbsink`, or in `go.mod`:
 
-## Releases / binaries
+  ```text
+  replace github.com/kbsink-org/kbsink => ../kbsink
+  ```
 
-Pushing a tag `v*` runs GitHub Actions: cross-builds **`kb-sink-md-douyin`** (same CLI as `kb-sink-md`, with Douyin Parser+Driver registered for `--plugin douyin`; `kbsink.Converter` runs in-process) plus optional **`douyin-plugin`** smoke binary. Archives and `SHA256SUMS.txt` attach to the GitHub Release. CI checks out `kbsink-org/kbsink` next to this module so the `replace` directive resolves on the runner.
-
-## Library usage
+## Use with `kbsink.Converter`
 
 ```go
 import (
-    kbsink "github.com/kbsink-org/kbsink/pkg"
-    "github.com/kbsink-org/kbsink/pkg/core"
-    "github.com/kbsink-org/douyin-plugin/pkg/douyin"
+	kbsink "github.com/kbsink-org/kbsink/pkg"
+	"github.com/kbsink-org/kbsink/pkg/core"
+	"github.com/kbsink-org/douyin-plugin/pkg/douyin"
 )
 
 converter := kbsink.NewConverter(
-    kbsink.WithParser(douyin.NewParser()),
-    kbsink.WithDriver(douyin.NewDriver(nil)), // or pass a custom *http.Client
+	kbsink.WithParser(douyin.NewParser()),
+	kbsink.WithDriver(douyin.NewDriver(nil)), // or your own *http.Client
 )
 
 res, err := converter.Convert(ctx, shareURLOrShareText, core.ConvertOptions{
-    OutputRoot: "output",
-    VideoMode:  core.VideoModeLink, // or core.VideoModeEmbed
+	OutputRoot: "output",
+	VideoMode:  core.VideoModeLink, // or core.VideoModeEmbed
 })
 ```
 
-Input may be a bare share URL or share text containing a URL (the first `http(s)` URL in the text is used).
+`Convert` accepts a bare `https://v.douyin.com/...` URL or arbitrary text; the **first** `http(s)` URL in the string is used.
 
-## Command-line
+## Optional: `pluginreg` by name
 
-From the repository root:
+`pkg/douyin` only exports **`NewParser`** and **`NewDriver`**. It does **not** ship a `core.Plugin` type. If you want `pluginreg.Lookup("douyin")` style registration, implement `core.Plugin` yourself. The maintained reference adapter is **[kbsink-cli/internal/plugin/douyin](https://github.com/kbsink-org/kbsink-cli/tree/main/internal/plugin/douyin)** (`douyin.New()` + `pluginreg.Register`); the shape is:
 
-```bash
-go run ./cmd/douyin-plugin --help
+```go
+type douyinPlugin struct{}
+
+func (douyinPlugin) Name() string { return "douyin" }
+
+func (douyinPlugin) NewComponents(c *http.Client) (core.Parser, core.Driver, error) {
+	return douyin.NewParser(), douyin.NewDriver(c), nil
+}
 ```
 
-Examples:
+## Releases and binaries
 
-```bash
-# Write assets under ./output and print a short summary to the terminal
-go run ./cmd/douyin-plugin -o output "https://v.douyin.com/xxxx/"
-
-# Print Markdown to stdout only (asset handling still follows Converter unless you change options)
-go run ./cmd/douyin-plugin -print "https://v.douyin.com/xxxx/"
-
-# Video in Markdown as link or embed
-go run ./cmd/douyin-plugin -video-mode=link "..."
-go run ./cmd/douyin-plugin -video-mode=embed "..."
-
-# Fetch+parse timeout (default 60s; 0 means no limit)
-go run ./cmd/douyin-plugin -timeout=90s "..."
-```
+- Tags **`v*`** mark **Go module** releases for `go get`.
+- This repo does **not** publish its own CLI binaries; prebuilt **`kbsink`** builds and multi-platform archives live under **[kbsink-cli releases](https://github.com/kbsink-org/kbsink-cli/releases)**.
 
 ## Tests
 

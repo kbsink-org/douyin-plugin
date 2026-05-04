@@ -15,7 +15,7 @@ go.work.sum
 # Vendor (uncomment if you do not commit vendor/)
 # vendor/
 
-# CLI default output (`douyin-plugin -o output`)
+# Default output when running converters locally (`-o output`)
 output/
 
 # OS / editor
