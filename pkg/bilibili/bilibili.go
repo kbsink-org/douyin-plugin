@@ -2,8 +2,6 @@
 package bilibili
 
 import (
-	"net/http"
-
 	bconv "github.com/kbsink-org/kbsink-plugins/internal/bilibili"
 	"github.com/kbsink-org/kbsink/pkg/core"
 )
@@ -12,4 +10,4 @@ import (
 func NewParser() core.Parser { return bconv.NewParser() }
 
 // NewDriver returns an HTTP fetch driver for Bilibili video URLs or share text.
-func NewDriver(c *http.Client) core.Driver { return bconv.NewHTTPDriver(c) }
+func NewDriver(c core.HTTPClient) core.Driver { return bconv.NewHTTPDriver(c) }

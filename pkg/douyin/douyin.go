@@ -3,8 +3,6 @@
 package douyin
 
 import (
-	"net/http"
-
 	dconv "github.com/kbsink-org/kbsink-plugins/internal/douyin"
 	"github.com/kbsink-org/kbsink/pkg/core"
 )
@@ -13,4 +11,4 @@ import (
 func NewParser() core.Parser { return dconv.NewParser() }
 
 // NewDriver returns a fetch driver for Douyin share URLs or share text.
-func NewDriver(c *http.Client) core.Driver { return dconv.NewHTTPDriver(c) }
+func NewDriver(c core.HTTPClient) core.Driver { return dconv.NewHTTPDriver(c) }

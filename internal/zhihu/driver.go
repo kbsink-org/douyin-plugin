@@ -17,10 +17,10 @@ const (
 
 // Driver fetches Zhihu zhuanlan article HTML.
 type Driver struct {
-	client *http.Client
+	client core.HTTPClient
 }
 
-func NewHTTPDriver(client *http.Client) *Driver {
+func NewHTTPDriver(client core.HTTPClient) *Driver {
 	if client == nil {
 		client = http.DefaultClient
 	}

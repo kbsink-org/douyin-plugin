@@ -18,11 +18,11 @@ var douyinVideoIDPattern = regexp.MustCompile(`(?i)(?:^|/)video/([^/?#]+)`)
 
 // Driver fetches Douyin page HTML from a share link or share text.
 type Driver struct {
-	client        *http.Client
+	client        core.HTTPClient
 	videoPageBase string
 }
 
-func NewHTTPDriver(client *http.Client) *Driver {
+func NewHTTPDriver(client core.HTTPClient) *Driver {
 	if client == nil {
 		client = http.DefaultClient
 	}
