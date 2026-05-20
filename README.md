@@ -1,10 +1,18 @@
-# douyin-plugin
+# kbsink-plugins
 
 English | [简体中文](README.zh-CN.md)
 
-Go module that adds **Douyin** (share links / share text) support to [kbsink](https://github.com/kbsink-org/kbsink): a **`Parser`** (HTML → article structure / markdown) and a **`Driver`** (HTTP fetch). Import **`github.com/kbsink-org/douyin-plugin/pkg/douyin`**.
+Go module of **platform plugins** for [kbsink](https://github.com/kbsink-org/kbsink): each package under `pkg/<name>` exports a **`Parser`** (HTML → article structure / markdown) and a **`Driver`** (HTTP fetch).
 
-**Command line:** use [kbsink-cli](https://github.com/kbsink-org/kbsink-cli) for a ready-made `kbsink` binary (WeChat, Xiaohongshu, Douyin).
+| Package | Platform |
+|---------|----------|
+| `pkg/wechat` | WeChat Official Account articles |
+| `pkg/xhs` | Xiaohongshu (小红书) share links |
+| `pkg/douyin` | Douyin share links / share text |
+| `pkg/bilibili` | Bilibili video pages (`BV…` URLs, `b23.tv`) |
+| `pkg/zhihu` | Zhihu zhuanlan articles (`zhuanlan.zhihu.com/p/…`) |
+
+**CLI:** use [kbsink-cli](https://github.com/kbsink-org/kbsink-cli) for a ready-made `kbsink` binary with all plugins wired.
 
 ## Requirements
 
@@ -21,40 +29,22 @@ Go module that adds **Douyin** (share links / share text) support to [kbsink](ht
 import (
 	kbsink "github.com/kbsink-org/kbsink/pkg"
 	"github.com/kbsink-org/kbsink/pkg/core"
-	"github.com/kbsink-org/douyin-plugin/pkg/douyin"
+	"github.com/kbsink-org/kbsink-plugins/pkg/wechat"
 )
 
 converter := kbsink.NewConverter(
-	kbsink.WithParser(douyin.NewParser()),
-	kbsink.WithDriver(douyin.NewDriver(nil)), // or your own *http.Client
+	kbsink.WithParser(wechat.NewParser()),
+	kbsink.WithDriver(wechat.NewDriver(nil)),
 )
 
-res, err := converter.Convert(ctx, shareURLOrShareText, core.ConvertOptions{
+res, err := converter.Convert(ctx, articleURL, core.ConvertOptions{
 	OutputRoot: "output",
-	VideoMode:  core.VideoModeLink, // or core.VideoModeEmbed
 })
 ```
 
-`Convert` accepts a bare `https://v.douyin.com/...` URL or arbitrary text; the **first** `http(s)` URL in the string is used.
-
 ## Optional: `pluginreg` by name
 
-`pkg/douyin` only exports **`NewParser`** and **`NewDriver`**. It does **not** ship a `core.Plugin` type. If you want `pluginreg.Lookup("douyin")` style registration, implement `core.Plugin` yourself. The maintained reference adapter is **[kbsink-cli/internal/plugin/douyin](https://github.com/kbsink-org/kbsink-cli/tree/main/internal/plugin/douyin)** (`douyin.New()` + `pluginreg.Register`); the shape is:
-
-```go
-type douyinPlugin struct{}
-
-func (douyinPlugin) Name() string { return "douyin" }
-
-func (douyinPlugin) NewComponents(c *http.Client) (core.Parser, core.Driver, error) {
-	return douyin.NewParser(), douyin.NewDriver(c), nil
-}
-```
-
-## Releases and binaries
-
-- Tags **`v*`** mark **Go module** releases for `go get`.
-- This repo does **not** publish its own CLI binaries; prebuilt **`kbsink`** builds and multi-platform archives live under **[kbsink-cli releases](https://github.com/kbsink-org/kbsink-cli/releases)**.
+Each `pkg/<name>` exports **`NewParser`** and **`NewDriver`** only. For `pluginreg.Lookup("wechat")` style registration, see **[kbsink-cli/internal/plugin](https://github.com/kbsink-org/kbsink-cli/tree/main/internal/plugin)**.
 
 ## Tests
 

@@ -5,7 +5,7 @@ package douyin
 import (
 	"net/http"
 
-	dconv "github.com/kbsink-org/douyin-plugin/internal/douyin"
+	dconv "github.com/kbsink-org/kbsink-plugins/internal/douyin"
 	"github.com/kbsink-org/kbsink/pkg/core"
 )
 
